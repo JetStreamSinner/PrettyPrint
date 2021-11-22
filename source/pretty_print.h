@@ -10,11 +10,14 @@ template<typename ValueType>
 void vectorPrinterImpl(std::ostream& os, const std::vector<ValueType>& container)
 {
     os << "{";
-    const auto itemsCount = container.size();
-    for (auto index = 0; index < itemsCount; ++index) {
-        const auto nextItem = container.at(index);
-        const auto lineEnder = index == itemsCount - 1 ? "" : ", ";
-        os << nextItem << lineEnder;
+
+    auto forwardIterator = container.begin();
+    const auto endIterator = container.end();
+
+    while (forwardIterator != endIterator) {
+        const auto lineEnder = std::next(forwardIterator) == endIterator ? "" : ", ";
+        os << *forwardIterator << lineEnder;
+        ++forwardIterator;
     }
     os << "}";
 }
