@@ -1,12 +1,15 @@
 #pragma once
+#include <ostream>
+
 #include <type_traits>
+#include <map>
+#include <unordered_map>
 #include <vector>
 
-template<typename OutputStream, typename LinearContainer>
-void vectorPrinterImpl(OutputStream &os, LinearContainer &&container)
+template<typename ValueType>
+void vectorPrinterImpl(std::ostream& os, const std::vector<ValueType>& container)
 {
     os << "{";
-
     const auto itemsCount = container.size();
     for (auto index = 0; index < itemsCount; ++index) {
         const auto nextItem = container.at(index);
@@ -16,12 +19,41 @@ void vectorPrinterImpl(OutputStream &os, LinearContainer &&container)
     os << "}";
 }
 
-template<typename OutputStream, typename Container>
-OutputStream& operator<<(OutputStream &os, Container&& container)
+template<typename Map>
+void mapPrinterImpl(std::ostream& os, Map &&map)
 {
-    using ContainType = typename std::decay_t<Container>::value_type;
-    if constexpr (std::is_same_v<std::decay_t<Container>, std::vector<ContainType>>) {
-        vectorPrinterImpl(os, container);
+    os << "{" << std::endl;
+
+    auto forwardIterator = map.begin();
+    const auto endIterator = map.end();
+
+    while (forwardIterator != endIterator) {
+        const auto lineEnder = std::next(forwardIterator) == endIterator ? "" : ", ";
+        os << "    " << forwardIterator->first << " : " << forwardIterator->second << lineEnder << std::endl;
+        forwardIterator = std::next(forwardIterator);
     }
+
+    os << "}";
+}
+
+
+template<typename ValueType>
+std::ostream& operator<<(std::ostream& os, const std::vector<ValueType>& container)
+{
+    vectorPrinterImpl(os, container);
+    return os;
+}
+
+template<typename Key, typename MappedValue>
+std::ostream& operator<<(std::ostream& os, const std::map<Key, MappedValue>& container)
+{
+    mapPrinterImpl(os, container);
+    return os;
+}
+
+template<typename Key, typename MappedValue>
+std::ostream& operator<<(std::ostream& os, const std::unordered_map<Key, MappedValue>& container)
+{
+    mapPrinterImpl(os, container);
     return os;
 }
